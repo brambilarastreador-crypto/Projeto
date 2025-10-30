@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerador de Texto - Gestores</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f4fdf6;
+      padding: 30px;
+      max-width: 750px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #006b2d;
+      background: #ffce00;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 600;
+      color: #00591f;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    button {
+      margin-top: 20px;
+      width: 48%;
+      padding: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      background: #006b2d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #009e44;
+    }
+    #botoes {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    #resultado {
+      background: #ffffff;
+      border-radius: 8px;
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      font-weight: bold;
+      color: #222;
+      white-space: pre-line;
+      min-height: 40px;
+    }
+    .oculto {
+      display: none;
+    }
+    footer {
+      margin-top: 30px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #004f1f;
+      border-top: 2px solid #ffce00;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gerador de Texto - Gestores</h1>
+
+  <label>Nome do Motorista:</label>
+  <input type="text" id="motorista" placeholder="Ex: FULANO ANTONIO DE MELHO">
+
+  <label>Telefone:</label>
+  <input type="text" id="telefone" placeholder="Ex: (48) 99955-1230" oninput="mascararTelefone(this)">
+
+  <label>Placa do Cavalo:</label>
+  <input type="text" id="placaCavalo" placeholder="Ex: QJC4450">
+
+  <label>Modelo da Carreta:</label>
+  <select id="modelo" onchange="verificarPersonalizado()">
+    <option value="SIDER">SIDER</option>
+    <option value="RODOTREM 30 MT">RODOTREM 30 MT</option>
+    <option value="RODOTREM 25.10 MT">RODOTREM 25.10 MT</option>
+    <option value="BITRENZAO 26 MT">BITRENZAO 26 MT</option>
+    <option value="LS GRADE ALTA">LS GRADE ALTA</option>
+    <option value="LS GRADE BAIXA SUCATEIRA">LS GRADE BAIXA SUCATEIRA</option>
+    <option value="4 EIXO">4 EIXO</option>
+    <option value="CARRETA 4 EIXO BOBINEIRA">CARRETA 4 EIXO BOBINEIRA</option>
+    <option value="CARRETA 4 EIXO">CARRETA 4 EIXO</option>
+    <option value="PERSONALIZADO">PERSONALIZADO</option>
+  </select>
+
+  <div id="personalizadoContainer" class="oculto">
+    <label>Modelo Personalizado:</label>
+    <input type="text" id="modeloPersonalizado" placeholder="Digite o modelo da carreta">
+  </div>
+
+  <div id="carretasContainer">
+    <label>Placa(s) da Carreta:</label>
+    <input type="text" class="placaCarreta" placeholder="Ex: RYI1B50">
+  </div>
+
+  <button type="button" onclick="adicionarCarreta()">+ Adicionar Outra Carreta</button>
+
+  <label>Está com carga de outro caminhão?</label>
+  <select id="temCarga">
+    <option value="nao">Não</option>
+    <option value="sim">Sim</option>
+  </select>
+
+  <div id="campoCarga" class="oculto">
+    <label>Placa da carga:</label>
+    <input type="text" id="placaCarga" placeholder="Ex: QJC8890">
+  </div>
+
+  <label>Cidade de Destino:</label>
+  <input type="text" id="destino" placeholder="Ex: JAGUARIUNA - SP">
+
+  <label>Observação:</label>
+  <textarea id="observacao" placeholder="Digite uma observação se necessário..."></textarea>
+
+  <div id="botoes">
+    <button onclick="gerarTexto()">Gerar Texto</button>
+    <button onclick="copiarTexto()">Copiar Texto</button>
+  </div>
+
+  <div id="resultado"></div>
+
+  <footer>
+    <span>Criado pela Equipe de Rastreamento</span>
+    <span>Eduardo</span>
+  </footer>
+
+  <script>
+    // Mascara de telefone (48) 99999-9999
+    function mascararTelefone(input) {
+      let valor = input.value.replace(/\D/g, '');
+      if (valor.length > 11) valor = valor.slice(0, 11);
+      if (valor.length > 2 && valor.length <= 7)
+        input.value = `(${valor.slice(0, 2)}) ${valor.slice(2)}`;
+      else if (valor.length > 7)
+        input.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7)}`;
+      else input.value = valor;
+    }
+
+    function verificarPersonalizado() {
+      const modelo = document.getElementById("modelo").value;
+      const container = document.getElementById("personalizadoContainer");
+      container.classList.toggle("oculto", modelo !== "PERSONALIZADO");
+    }
+
+    const temCargaSelect = document.getElementById("temCarga");
+    const campoCarga = document.getElementById("campoCarga");
+
+    temCargaSelect.addEventListener("change", () => {
+      campoCarga.classList.toggle("oculto", temCargaSelect.value === "nao");
+    });
+
+    function adicionarCarreta() {
+      const container = document.getElementById("carretasContainer");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "placaCarreta";
+      input.placeholder = "Ex: RYX5F25 ou DOLLY_RYX5F45";
+      input.style.marginTop = "6px";
+      container.appendChild(input);
+    }
+
+    function validarTelefone(telefone) {
+      const padrao = /^\(\d{2}\)\s\d{5}-\d{4}$/;
+      return padrao.test(telefone);
+    }
+
+    function gerarTexto() {
+      const motorista = document.getElementById("motorista").value.trim().toUpperCase();
+      const telefone = document.getElementById("telefone").value.trim();
+      const placaCavalo = document.getElementById("placaCavalo").value.trim().toUpperCase();
+      let modelo = document.getElementById("modelo").value.toUpperCase();
+      const modeloPersonalizado = document.getElementById("modeloPersonalizado").value.trim().toUpperCase();
+      const destino = document.getElementById("destino").value.trim().toUpperCase();
+      const temCarga = document.getElementById("temCarga").value;
+      const placaCarga = document.getElementById("placaCarga").value.trim().toUpperCase();
+      const observacao = document.getElementById("observacao").value.trim();
+
+      const placasCarreta = Array.from(document.getElementsByClassName("placaCarreta"))
+        .map(input => input.value.trim().toUpperCase())
+        .filter(p => p !== "");
+
+      if (!motorista || !telefone || !placaCavalo || placasCarreta.length === 0 || !destino) {
+        alert("Preencha todos os campos obrigatórios!");
+        return;
+      }
+
+      if (!validarTelefone(telefone)) {
+        alert("Número de telefone inválido! Use o formato (99) 99999-9999");
+        return;
+      }
+
+      if (modelo === "PERSONALIZADO") {
+        if (!modeloPersonalizado) {
+          alert("Digite o modelo personalizado da carreta!");
+          return;
+        }
+        modelo = modeloPersonalizado;
+      }
+
+      let placasTexto = "";
+      if (placasCarreta.length === 1) {
+        placasTexto = placasCarreta[0];
+      } else {
+        placasTexto = placasCarreta
+          .map((p, i) => `${i + 1}°_${p}`)
+          .join(" + ");
+      }
+
+      let texto = `${motorista} - ${telefone} segue com a placa ${placaCavalo} || [${modelo}] * ${placasTexto}`;
+
+      if (temCarga === "sim" && placaCarga) {
+        texto += ` (CARGA DE ${placaCarga})`;
+      }
+
+      texto += ` para ${destino}.`;
+
+      if (observacao) {
+        texto += `\n\nOBS: ${observacao}`;
+      }
+
+      document.getElementById("resultado").innerText = texto;
+    }
+
+    function copiarTexto() {
+      const resultado = document.getElementById("resultado").innerText;
+      if (!resultado) {
+        alert("Nenhum texto gerado para copiar!");
+        return;
+      }
+      navigator.clipboard.writeText(resultado);
+      alert("Texto copiado com sucesso!");
+    }
+  </script>
+</body>
+</html>
